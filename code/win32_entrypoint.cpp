@@ -4,6 +4,18 @@ HWND MainWindow;
 
 WNDPROC Wndproc;
 
+typedef struct Point {
+    int X;
+    int Y;
+} Point;
+
+static Point s_GetRectCenter(const RECT &rectangle)
+{
+    int X = static_cast<int>((rectangle.right - rectangle.left)/2.0);
+    int Y = static_cast<int>((rectangle.bottom - rectangle.top)/2.0);
+    return Point{ X, Y };
+}
+
 LRESULT WindowMessageCallback(
   HWND WindowHandle,
   UINT Msg,
@@ -37,6 +49,30 @@ LRESULT WindowMessageCallback(
         case WM_ACTIVATEAPP:
         {
             OutputDebugStringA("WM_ACTIVATEAPP\n");
+        } break;
+
+        case WM_PAINT:
+        {
+            PAINTSTRUCT Paint = {};
+            Paint.fErase = 1;
+            int X = Paint.rcPaint.left;
+            int Y = Paint.rcPaint.right;
+            int Height = Paint.rcPaint.bottom - Paint.rcPaint.top;
+            int Width = Paint.rcPaint.right - Paint.rcPaint.left;
+            HDC DeviceContext = BeginPaint(WindowHandle, &Paint);
+            if (DeviceContext == 0)
+            {
+                break;
+            }
+            else
+            {
+                Point centerPoint = s_GetRectCenter(Paint.rcPaint);
+                int centerX = centerPoint.X;
+                int centerY = centerPoint.Y;
+                TextOutA(DeviceContext, centerX, centerY, "X", 1);
+                PatBlt(DeviceContext, X, Y, Width, Height, WHITENESS);
+                EndPaint(WindowHandle, &Paint);
+            }
         } break;
 
         default:
