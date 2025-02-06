@@ -1,8 +1,7 @@
 #include <windows.h>
 
+static bool Running = false;
 HWND MainWindow;
-
-WNDPROC Wndproc;
 
 typedef struct Point {
     int X;
@@ -38,12 +37,13 @@ LRESULT WindowMessageCallback(
         case WM_DESTROY:
         {
             OutputDebugStringA("WM_DESTROY\n");
+            Running = false;
         } break;
 
         case WM_CLOSE:
         {
             OutputDebugStringA("WM_CLOSE\n");
-            PostQuitMessage(0);
+            Running = false;
         } break;
 
         case WM_ACTIVATEAPP:
@@ -114,9 +114,10 @@ int APIENTRY WinMain(
         
         if (MainWindow)
         {
+            Running = true;
             MSG Msg;
             BOOL MessageReturnValue;
-            while ((MessageReturnValue = GetMessage(&Msg, NULL, 0, 0)) != 0)
+            while (Running && (MessageReturnValue = GetMessage(&Msg, NULL, 0, 0)) != 0)
             {
                 if (MessageReturnValue > 0)
                 {
@@ -138,41 +139,6 @@ int APIENTRY WinMain(
     {
         //logging
     }
-
-    /*hMainWin = CreateWindow("MainWindClass", 
-                            "Main Window", 
-                            WS_OVERLAPPEDWINDOW,
-                            CW_USEDEFAULT, CW_USEDEFAULT,
-                            CW_USEDEFAULT, CW_USEDEFAULT,
-                            static_cast<HWND>(NULL),
-                            static_cast<HMENU>(NULL),
-                            hInstance,
-                            static_cast<LPVOID>(NULL));
     
-    if (!hMainWin)
-    {
-        return 0;
-    }
-
-    ShowWindow(hMainWin, nShowCmd);
-    UpdateWindow(hMainWin);
-
-    MSG msg;
-    BOOL bRet;
-    while ((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
-    {
-        if (bRet == -1)
-        {
-            break;
-        }
-        else
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
-
-    return msg.wParam;
-    */
    return 0;
 }
